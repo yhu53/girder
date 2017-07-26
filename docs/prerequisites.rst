@@ -3,7 +3,7 @@ System Prerequisites
 
 The following software packages are required to be installed on your system:
 
-* `Python 2.7 or 3.4 <https://www.python.org>`_
+* `Python 2.7 or 3.4+ <https://www.python.org>`_
 * `pip <https://pypi.python.org/pypi/pi>`_
 * `MongoDB 2.6+ <http://www.mongodb.org/>`_
 * `Node.js 6.5+ <http://nodejs.org/>`_
@@ -16,8 +16,48 @@ to communicate with an SMTP server. Proper installation and configuration of
 an SMTP server on your system is beyond the scope of these docs, but we
 recommend setting up `Postfix <http://www.postfix.org/documentation.html>`_.
 
-See the specific instructions for your platform below.
 
+Initial Setup
+-------------
+
+.. tabs::
+   .. group-tab:: Ubuntu 16.04
+
+      To install system package prerequisites, run the command:
+
+      .. code-block:: bash
+
+         sudo apt-get install -y curl build-essential git libffi-dev make python-dev python-pip libssl-dev libjpeg-dev zlib1g-dev
+
+   .. group-tab:: Ubuntu 14.04
+
+      To install system package prerequisites, run the command:
+
+      .. code-block:: bash
+
+         sudo apt-get install -y curl build-essential git libffi-dev make python-dev python-pip libssl-dev libjpeg-dev zlib1g-dev
+
+   .. group-tab:: RHEL (CentOS) 7
+
+      Enable the `Extra Packages for Enterprise Linux <https://fedoraproject.org/wiki/EPEL>`_ YUM
+      repository:
+
+      .. code-block:: bash
+
+         sudo yum -y install epel-release
+
+      To install system package prerequisites, run the command:
+
+      .. code-block:: bash
+
+         sudo yum install curl gcc-c++ make git libffi-devel make python-devel python-pip openssl-devel libjpeg-turbo-devel zlib-devel
+
+   .. group-tab:: macOS
+
+      Install `Homebrew <http://brew.sh/>`_.
+
+Python
+------
 .. note:: We perform continuous integration testing using Python 2.7 and Python 3.4.
    The system *should* work on other versions of Python 3 as well, but we do not
    verify that support in our automated testing at this time, so use at your own
@@ -27,176 +67,166 @@ See the specific instructions for your platform below.
    third party library dependencies. Namely, the HDFS Assetstore plugin and the
    Metadata Extractor plugin will only be available in a Python 2.7 environment.
 
-.. note:: It's recommended to get the latest version of the npm package manager, and Girder currently
-   requires at least version 3.10 of npm. To upgrade to the latest npm, after installing Node.js,
-   run:
+.. tabs::
+   .. group-tab:: Ubuntu 16.04
 
-   .. code-block:: bash
+      TODO
 
-      npm install -g npm
+   .. group-tab:: Ubuntu 14.04
 
-   This may need to be run as root using ``sudo``.
+      TODO
 
+   .. group-tab:: RHEL (CentOS) 7
 
-* :ref:`debian-ubuntu`
-* :ref:`centos-fedora-rhel`
-* :ref:`archlinux`
-* :ref:`os-x`
-* :ref:`windows`
+      TODO
 
-.. _debian-ubuntu:
+   .. group-tab:: macOS
 
-Debian / Ubuntu
----------------
+      To install all the prerequisites at once just use:
 
-Install the prerequisites using APT: ::
+      .. code-block:: bash
 
-    sudo apt-get install curl g++ git libffi-dev make python-dev python-pip libssl-dev libjpeg-dev zlib1g-dev
+         brew install python
 
-MongoDB 2.6 requires a special incantation to install at this time. Install
-the APT key with the following: ::
+      .. note:: OS X ships with Python in ``/usr/bin``, so you might need to change your
+         PATH or explicitly run ``/usr/local/bin/python`` when invoking the server so
+         that you use the version with the correct site packages installed.
 
-    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
-
-For Debian, create the following configuration file for the MongoDB APT repository: ::
-
-    echo 'deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen' \
-        | sudo tee /etc/apt/sources.list.d/mongodb.list
-
-For Ubuntu, instead create the following configuration file: ::
-
-    echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' \
-        | sudo tee /etc/apt/sources.list.d/mongodb.list
-
-Reload the package database and install MongoDB server using APT: ::
-
-    sudo apt-get update
-    sudo apt-get install mongodb-org-server
-
-With Ubuntu 16.04, create a systemd init script at
-
-``/lib/systemd/system/mongod.service``: ::
-
-  [Unit]
-  Description=High-performance, schema-free document-oriented database
-  After=network.target
-  Documentation=https://docs.mongodb.org/manual
-
-  [Service]
-  User=mongodb
-  Group=mongodb
-  ExecStart=/usr/bin/mongod --quiet --config /etc/mongod.conf
-
-  [Install]
-  WantedBy=multi-user.target
-
-and start it with: ::
-
-  sudo service mongod start
-
-Enable the Node.js APT repository: ::
-
-    curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-
-Install Node.js and NPM using APT: ::
-
-    sudo apt-get install nodejs
-
-
-.. _centos-fedora-rhel:
-
-CentOS / Fedora / Red Hat Enterprise Linux
-------------------------------------------
-
-For CentOS and Red Hat Enterprise Linux, enable the
-`Extra Packages for Enterprise Linux <https://fedoraproject.org/wiki/EPEL>`_
-YUM repository: ::
-
-   sudo yum install epel-release
-
-Install the prerequisites using YUM: ::
-
-   sudo yum install curl gcc-c++ git libffi-devel make python-devel python-pip openssl-devel libjpeg-turbo-devel zlib-devel
-
-Create a file ``/etc/yum.repos.d/mongodb.repo`` that contains the following
-configuration information for the MongoDB YUM repository:
-
-.. code-block:: cfg
-
-    [mongodb]
-    name=MongoDB Repository
-    baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/
-    gpgcheck=0
-    enabled=1
-
-Install MongoDB server using YUM: ::
-
-    sudo yum install mongodb-org-server
-
-Enable the Node.js YUM repository: ::
-
-    curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
-
-Install Node.js and NPM using YUM: ::
-
-    sudo yum install nodejs
-
-.. _archlinux:
-
-Arch Linux
-----------
-
-For Arch Linux it is important to note that Python 3 is default. This means
-that most commands will need a 2 appending to them, i.e. python2, pip2, ...
-
-Install the prerequisites using the pacman tool: ::
-
-    sudo pacman -S python2 python2-pip mongodb nodejs
-
-.. _os-x:
-
-OS X
-----
-
-It is recommended to use `Homebrew <http://brew.sh/>`_ to install the required
-packages on OS X.
-
-To install all the prerequisites at once just use: ::
-
-    brew install python mongodb node
-
-.. note:: OS X ships with Python in ``/usr/bin``, so you might need to change your
-   PATH or explicitly run ``/usr/local/bin/python`` when invoking the server so
-   that you use the version with the correct site packages installed.
-
-.. _windows:
-
-Windows
+MongoDB
 -------
+Girder can connect to any instance of `MongoDB <https://www.mongodb.com/>`_ v3.0 or later, running
+on any machine. If MongoDB is going to be installed locally for development or a simple deployment,
+it is recommended that the latest release (v3.4) be installed.
 
-.. warning:: **Windows is not supported or tested. This information is
-   provided for developers. Use at your own risk.**
+.. tabs::
+   .. group-tab:: Ubuntu 16.04
 
-Download, install, and configure MongoDB server following the
-`instructions <http://docs.mongodb.org/manual/tutorial/install-mongodb-on-windows/>`_
-on the MongoDB website, and download and run the Node.js
-`Windows Installer <http://nodejs.org/download/>`_ from the Node.js website.
+      To install, run the commands:
 
-Download and install the `Windows MSI Installer <https://www.python.org/downloads/windows/>`_
-for the latest Python 2 release from the Python website, and then  download and
-run the `ez_setup.py <https://bootstrap.pypa.io/ez_setup.py>`_ bootstrap script
-to install `Setuptools <https://pypi.python.org/pypi/setuptools>`_ for Python.
-You may need to add ``python\scripts`` to your path for NPM to work as expected.
+      .. code-block:: bash
 
-From a command prompt, install pip: ::
+         sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+         echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+         sudo apt-get update
+         sudo apt-get install -y mongodb-org-server mongodb-org-shell
 
-    easy_install pip
+      MongoDB server will register itself as a systemd service (called ``mongod``). To start it
+      immediately and on every reboot, run the commands:
 
-If bcrypt fails to install using pip (e.g., with Windows 7 x64 and Python
-2.7), you need to manually install it prior to installing girder. You can
-build the package from source or download a wheel file from
-`<https://bitbucket.org/alexandrul/py-bcrypt/downloads>`_ and install it
-with the following: ::
+      .. code-block:: bash
 
-    pip install wheel
-    pip install py_bcrypt.whl
+         sudo systemctl start mongod
+         sudo systemctl enable mongod
+
+   .. group-tab:: Ubuntu 14.04
+
+      To install, run the commands:
+
+      .. code-block:: bash
+
+         sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+         echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+         sudo apt-get update
+         sudo apt-get install -y mongodb-org-server mongodb-org-shell
+
+      MongoDB server will register itself as an Upstart service (called ``mongod``), and will
+      automatically start immediately and on every reboot.
+
+   .. group-tab:: RHEL (CentOS) 7
+
+      To install, create a file at ``/etc/yum.repos.d/mongodb-org-3.4.repo``, with:
+
+      .. code-block:: cfg
+
+         [mongodb-org-3.4]
+         name=MongoDB Repository
+         baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/3.4/x86_64/
+         gpgcheck=1
+         enabled=1
+         gpgkey=https://www.mongodb.org/static/pgp/server-3.4.asc
+
+      then run the command:
+
+      .. code-block:: bash
+
+         sudo yum -y install mongodb-org-server mongodb-org-shell
+
+      MongoDB server will register itself as a systemd service (called ``mongod``), and will
+      autoamtically start on every reboot. To start it immediately, run the command:
+
+      .. code-block:: bash
+
+         sudo systemctl start mongod
+
+   .. group-tab:: macOS
+
+      To install, run the command:
+
+      .. code-block:: bash
+
+         brew install mongodb
+
+      TODO: does this auto-start?
+
+Node.js
+-------
+Girder requires `Node.js <https://nodejs.org/>`_ v6.5 or later to build its web client components.
+To ensure stability, it is recommended that the
+`Active LTS release <https://github.com/nodejs/LTS#lts-schedule1>`_ (v6.x) be installed.
+
+.. tabs::
+   .. group-tab:: Ubuntu 16.04
+
+      To install, run the commands:
+
+      .. code-block:: bash
+
+         curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+         sudo apt-get install -y nodejs
+
+   .. group-tab:: Ubuntu 14.04
+
+      To install, run the commands:
+
+      .. code-block:: bash
+
+         curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+         sudo apt-get install -y nodejs
+
+   .. group-tab:: RHEL (CentOS) 7
+
+      To install, run the commands:
+
+      .. code-block:: bash
+
+         curl --silent --location https://rpm.nodesource.com/setup_6.x | sudo bash -
+         sudo yum -y install nodejs
+
+   .. group-tab:: macOS
+
+      To install, run the command:
+
+      .. code-block:: bash
+
+         brew install node
+
+npm
+---
+Girder requires `npm <https://docs.npmjs.com/>`_ to install web client packages. While Node.js v6
+will install npm v3.10 by default, is it **strongly recommended that npm v5.3 or later be
+installed**.
+
+To upgrade to the latest npm on all platforms, either:
+
+- `Fix npm's global permissions <https://docs.npmjs.com/getting-started/fixing-npm-permissions>`_,
+  then run the command :
+
+  .. code-block:: bash
+
+     npm install -g npm
+
+- Or just run the command:
+
+  .. code-block:: bash
+
+     sudo npm install -g npm
