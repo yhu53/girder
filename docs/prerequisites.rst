@@ -152,7 +152,7 @@ it is recommended that the latest release (v3.4) be installed.
          sudo yum -y install mongodb-org-server mongodb-org-shell
 
       MongoDB server will register itself as a systemd service (called ``mongod``), and will
-      autoamtically start on every reboot. To start it immediately, run the command:
+      automatically start on every reboot. To start it immediately, run the command:
 
       .. code-block:: bash
 
@@ -166,7 +166,12 @@ it is recommended that the latest release (v3.4) be installed.
 
          brew install mongodb
 
-      TODO: does this auto-start?
+      MongoDB does not run automatically as a service on macOS, so you'll need to either configure it
+      as a service yourself, or just ensure it's running manually via the following command:
+
+      .. code-block:: bash
+
+        mongod -f /usr/local/etc/mongod.conf
 
 Node.js
 -------
