@@ -1,7 +1,7 @@
 var path = require('path');
 
-module.exports = function (config, data) {
-    var candelaDir = path.resolve(data.nodeDir, 'candela');
+module.exports = function (config) {
+    var candelaDir = path.resolve(path.dirname(require.resolve('candela')));
 
     config.module.rules.push({
         resource: {

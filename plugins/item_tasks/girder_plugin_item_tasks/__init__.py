@@ -4,8 +4,10 @@ from girder import events
 from girder.constants import registerAccessFlag, AccessType, TokenScope
 from girder.models.item import Item
 from girder.models.token import Token
-from girder.plugins.jobs.constants import JobStatus
-from girder.plugins.jobs.models.job import Job
+from girder.plugin import getPlugin, GirderPlugin
+from girder_plugin_jobs.constants import JobStatus
+from girder_plugin_jobs.models.job import Job
+
 from . import constants
 from .rest import ItemTask
 from .json_tasks import createItemTasksFromJson, configureItemTaskFromJson, \
@@ -80,8 +82,8 @@ def load(info):
     Item().exposeFields(level=AccessType.READ, fields='createdByJob')
     Job().exposeFields(level=AccessType.READ, fields={'itemTaskId', 'itemTaskBindings'})
 
-    events.bind('jobs.job.update', info['name'], _onJobSave)
-    events.bind('data.process', info['name'], _onUpload)
+    events.bind('jobs.job.update', 'item_tasks', _onJobSave)
+    events.bind('data.process', 'item_tasks', _onUpload)
 
     info['apiRoot'].item_task = ItemTask()
 
@@ -102,3 +104,12 @@ def load(info):
                                  runJsonTasksDescriptionForFolder)
     info['apiRoot'].folder.route('POST', (':id', 'item_task_json_specs'),
                                  createItemTasksFromJson)
+
+
+class ItemTasksPlugin(GirderPlugin):
+    NPM_PACKAGE_NAME = '@girder/item_tasks'
+
+    def load(self, info):
+        getPlugin('jobs').load(info)
+        getPlugin('worker').load(info)
+        return load(info)

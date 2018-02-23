@@ -6,7 +6,7 @@ import candela from 'candela';
 import 'candela/plugins/vega/load';
 import 'candela/plugins/treeheatmap/load';
 
-import datalib from 'girder_plugins/candela/node/datalib';
+import datalib from 'datalib';
 
 import CandelaWidgetTemplate from '../templates/candelaWidget.pug';
 import '../stylesheets/candelaWidget.styl';

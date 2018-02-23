@@ -21,6 +21,7 @@
     },
     "main": "./index.js",
     "girder-plugin": {
+        "name": "jobs",
         "main": "./main.js"
     }
 }
