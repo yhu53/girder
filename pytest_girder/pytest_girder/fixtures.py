@@ -7,6 +7,7 @@ import pytest
 import shutil
 
 from .utils import MockSmtpReceiver, request as restRequest
+from .plugin_registry import PluginRegistry
 
 
 def _uid(node):
@@ -93,43 +94,36 @@ def server(db, request):
     girder.events.daemon = girder.events.AsyncEventsThread()
 
     enabledPlugins = []
-    installedPluginMarkers = request.node.get_marker('plugin')
-    testPluginMarkers = request.node.get_marker('testPlugin')
-
-    if installedPluginMarkers is not None and testPluginMarkers is not None:
-        raise Exception(
-            'The "testPlugin" and "plugin" markers cannot both be used on a single test'
-        )
-
-    elif installedPluginMarkers is not None:
-        for installedPluginMarker in installedPluginMarkers:
-            pluginName = installedPluginMarker.args[0]
-            enabledPlugins.append(pluginName)
-
-    elif testPluginMarkers is not None:
+    testPluginMarkers = request.node.get_marker('plugin')
+    pluginRegistry = PluginRegistry()
+    if testPluginMarkers is not None:
         for testPluginMarker in testPluginMarkers:
-            pluginName = testPluginMarker.args[0]
-            enabledPlugins.append(pluginName)
+            if len(testPluginMarker.args) > 1:
+                pluginRegistry.registerTestPlugin(
+                    *testPluginMarker.args, **testPluginMarker.kwargs
+                )
+            enabledPlugins.append(testPluginMarker.args[0])
 
         Setting().set(SettingKey.PLUGINS_ENABLED, enabledPlugins)
 
-    server = setupServer(test=True, plugins=enabledPlugins)
-    server.request = restRequest
+    with pluginRegistry():
+        server = setupServer(test=True, plugins=enabledPlugins)
+        server.request = restRequest
 
-    cherrypy.server.unsubscribe()
-    cherrypy.config.update({'environment': 'embedded',
-                            'log.screen': False,
-                            'request.throw_errors': True})
-    cherrypy.engine.start()
+        cherrypy.server.unsubscribe()
+        cherrypy.config.update({'environment': 'embedded',
+                                'log.screen': False,
+                                'request.throw_errors': True})
+        cherrypy.engine.start()
 
-    yield server
+        yield server
 
-    cherrypy.engine.unsubscribe('start', girder.events.daemon.start)
-    cherrypy.engine.unsubscribe('stop', girder.events.daemon.stop)
-    cherrypy.engine.stop()
-    cherrypy.engine.exit()
-    cherrypy.tree.apps = {}
-    docs.routes.clear()
+        cherrypy.engine.unsubscribe('start', girder.events.daemon.start)
+        cherrypy.engine.unsubscribe('stop', girder.events.daemon.stop)
+        cherrypy.engine.stop()
+        cherrypy.engine.exit()
+        cherrypy.tree.apps = {}
+        docs.routes.clear()
 
 
 @pytest.fixture
