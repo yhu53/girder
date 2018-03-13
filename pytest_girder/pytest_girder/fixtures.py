@@ -69,8 +69,6 @@ def db(request):
 
     # Apply any database fixture setup
     if request.node.get_marker('dbFixture'):
-        setupDbFixture(request.node.fspath.join(request.node.get_marker('dbFixture').args[0]))
-
         setupDbFixture(request.node.fspath.dirpath().join(request.node.get_marker('dbFixture')
                                                           .args[0]).strpath)
     yield connection
