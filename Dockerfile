@@ -29,6 +29,6 @@ COPY package.json /girder/package.json
 COPY README.rst /girder/README.rst
 
 RUN pip install --upgrade --editable .[plugins]
-RUN girder-build
+RUN girder build
 
 ENTRYPOINT ["girder", "serve"]
