@@ -12,8 +12,6 @@
         "url": "https://github.com/girder/girder.git"
     },
     "dependencies": {
-        "jquery": "^3.2",
-        "moment": "^2.20.1",
         "vega": "^2.6.0"
     },
     "peerDependencies": {
